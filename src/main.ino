@@ -3,51 +3,30 @@
 #include <Trace.h>
 #include <Timer.h>
 #include <OneButton.h>
-#include <Adafruit_INA219.h>
+// #include <Adafruit_INA219.h>
+#include <Const.h>
 
-Adafruit_INA219 _powerMonitor;
+// Adafruit_INA219 _powerMonitor;
 
 #if defined(USE_TINYUSB)
 #include <Adafruit_TinyUSB.h> // for Serial
 #endif
 
 // config
-const String APP_VERSION = "0.1";     // the version of this app
+const String APP_VERSION = "0.4";     // the version of this app
 const String APP_NAME = "Glow Totem"; // the name of this app
 const bool WAIT_FOR_SERIAL = true;
-const unsigned int SERIAL_BAUDRATE = 115200;
 
 // NEOPIXEL CONFIG
-#define LED_PIN 6
-#define LED_COUNT 60
-Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel strip(Const::BIG_RING_LED_COUNT, Const::BIG_RING_LED_PIN, NEO_GRB + NEO_KHZ800);
 
-Trace trace = Trace();
+Trace _trace = Trace();
 const String DEBUG_RULE = "=====================================================\n";
 
 Timer timer;
 
-// config OLED
-const bool USE_DISPLAY = false;
-const bool UPSIDE_DOWN_DISPLAY = false;
-const byte OLED_RESET = 5;
-const unsigned int OLED_STARTUP_DELAY = 1000;
-
-// Onboard Status NeoPixel
-const bool USE_ONBOARD_NEOPIXEL = true;
-const byte ONBOARD_NEOPIXEL_PIN = 8;
-const uint32_t DEFAULT_NEOPIXEL_COLOR = trace.GREEN;
-// controlling glow speed from here is not implemented yet
-// const unsigned long ONBOARD_NEOPIXEL_SINE_GLOW_SPEED = 500.0; // LOWER numbers for faster glow speed
-
-// PINS
-// const byte SENSOR_PIN = A5;
-// const byte LIGHT_SWITCH_PIN = A0;
-// NeoPixel Pins are defined in their own config section above
-
 // INTERRUPTS
 volatile bool interrupted = false;
-// int _lightLevel = 0; not yet used
 
 // STATE
 const byte OFF_STATE = 0;
@@ -56,47 +35,90 @@ byte _state = OFF_STATE;
 byte _queuedState = OFF_STATE;
 bool _builtInLEDisOn = false;
 
+/*
+ *
+ *
+ *
+ *
+ *
+ *
+
+ ad88888ba                        88        88
+d8"     "8b                ,d     88        88
+Y8,                        88     88        88
+`Y8aaaaa,     ,adPPYba,  MM88MMM  88        88  8b,dPPYba,
+  `"""""8b,  a8P_____88    88     88        88  88P'    "8a
+        `8b  8PP"""""""    88     88        88  88       d8
+Y8a     a8P  "8b,   ,aa    88,    Y8a.    .a8P  88b,   ,a8"
+ "Y88888P"    `"Ybbd8"'    "Y888   `"Y8888Y"'   88`YbbdP"'
+                                                88
+                                                88
+ *
+ ***************        SETUP       ****************
+ *
+ */
+
 void setup()
 {
-  trace.initSerial(SERIAL_BAUDRATE, WAIT_FOR_SERIAL);
-  if (USE_ONBOARD_NEOPIXEL)
-    trace.initNeoPixel(1, ONBOARD_NEOPIXEL_PIN);
-  trace.setNeoPixelColor(trace.YELLOW);
+  // long startUpDelay = 1000;
+  // delay(startUpDelay);
+
+  _trace.initSerial(Const::SERIAL_BAUDRATE, WAIT_FOR_SERIAL);
+  if (Const::USE_ONBOARD_NEOPIXEL)
+  {
+    _trace.initNeoPixel(1, Const::ONBOARD_NEOPIXEL_PIN);
+    _trace.setNeoPixelColor(_trace.YELLOW);
+  }
+  if (Const::USE_DISPLAY)
+    _trace.initDisplay(Const::UPSIDE_DOWN_DISPLAY, Const::OLED_STARTUP_DELAY, Const::OLED_RESET);
+  long randomValue = analogRead(A1);
+  trace("randomValue" + String(randomValue));
+  randomSeed(randomValue);
   showStartUpMessage();
   initPins();
   initTimers();
-  initPowerMonitor();
-  initNeoPixelStrip();
+  // initPowerMonitor();
+  initBigRingNeoPixelStrip();
 }
 
 void loop()
 {
   timer.update();
-  trace.loop();
+  _trace.loop();
   // loopStrandTest();
 }
 
 void initPowerMonitor()
 {
-  if (!_powerMonitor.begin())
-  {
-    trace.trace("Failed to find INA219 chip to use as _powerMonitor");
-  }
+  // if (!_powerMonitor.begin())
+  // {
+  //   trace("Failed to find INA219 chip to use as _powerMonitor");
+  // }
+  // else
+  //   timer.every(8000, updatePowerMonitor);
 }
 
-void initNeoPixelStrip()
+void initBigRingNeoPixelStrip()
 {
   strip.begin();            // INITIALIZE NeoPixel strip object (REQUIRED)
-  strip.show();             // Turn OFF all pixels ASAP
   strip.setBrightness(100); // Set BRIGHTNESS to about 1/5 (max = 255)
-  fillStrand(strip.Color(255, 0, 128));
-  strip.show(); // Turn OFF all pixels ASAP
+  fillBigRingNewPixelStripWithSingleRandomColor();
+}
+
+void fillBigRingNewPixelStripWithSingleRandomColor()
+{
+  byte r = random(255);
+  byte g = random(255);
+  byte b = random(255);
+  trace(String("r:" + String(r) + " g:" + String(g) + " b:" + String(b)));
+  _trace.setNeoPixelColor(r, g, b);
+  fillStrand(strip.Color(r, g, b));
 }
 
 void initTimers()
 {
   timer.every(500, toggleBuiltInLED);
-  timer.every(3000, updatePowerMonitor);
+  timer.every(2000, fillBigRingNewPixelStripWithSingleRandomColor);
 }
 
 void toggleBuiltInLED()
@@ -110,40 +132,40 @@ void toggleBuiltInLED()
     digitalWrite(LED_BUILTIN, LOW);
   }
   _builtInLEDisOn = !_builtInLEDisOn;
-  // trace.trace("Built in LED is " + String(_builtInLEDisOn ? "on." : "off."));
+  // trace("Built in LED is " + String(_builtInLEDisOn ? "on." : "off."));
 }
 
 void updatePowerMonitor(void)
 {
-  float shuntvoltage = 0;
-  float busvoltage = 0;
-  float current_mA = 0;
-  float loadvoltage = 0;
-  float power_mW = 0;
+  // float shuntvoltage = 0;
+  // float busvoltage = 0;
+  // float current_mA = 0;
+  // float loadvoltage = 0;
+  // float power_mW = 0;
 
-  shuntvoltage = _powerMonitor.getShuntVoltage_mV();
-  busvoltage = _powerMonitor.getBusVoltage_V();
-  current_mA = _powerMonitor.getCurrent_mA();
-  power_mW = _powerMonitor.getPower_mW();
-  loadvoltage = busvoltage + (shuntvoltage / 1000);
+  // shuntvoltage = _powerMonitor.getShuntVoltage_mV();
+  // busvoltage = _powerMonitor.getBusVoltage_V();
+  // current_mA = _powerMonitor.getCurrent_mA();
+  // power_mW = _powerMonitor.getPower_mW();
+  // loadvoltage = busvoltage + (shuntvoltage / 1000);
 
-  String displayTxt = "";
-  displayTxt += ("Bus Voltage:   ");
-  displayTxt += (busvoltage);
-  displayTxt += (" V\n");
-  displayTxt += ("Shunt Voltage: ");
-  displayTxt += (shuntvoltage);
-  displayTxt += (" mV\n");
-  displayTxt += ("Load Voltage:  ");
-  displayTxt += (loadvoltage);
-  displayTxt += (" V\n");
-  displayTxt += ("Current:       ");
-  displayTxt += (current_mA);
-  displayTxt += (" mA\n");
-  displayTxt += ("Power:         ");
-  displayTxt += (power_mW);
-  displayTxt += (" mW\n");
-  trace.trace(displayTxt);
+  // String displayTxt = "";
+  // displayTxt += ("Bus Voltage:   ");
+  // displayTxt += (busvoltage);
+  // displayTxt += (" V\n");
+  // displayTxt += ("Shunt Voltage: ");
+  // displayTxt += (shuntvoltage);
+  // displayTxt += (" mV\n");
+  // displayTxt += ("Load Voltage:  ");
+  // displayTxt += (loadvoltage);
+  // displayTxt += (" V\n");
+  // displayTxt += ("Current:       ");
+  // displayTxt += (current_mA);
+  // displayTxt += (" mA\n");
+  // displayTxt += ("Power:         ");
+  // displayTxt += (power_mW);
+  // displayTxt += (" mW\n");
+  // trace(displayTxt);
 }
 
 /*
@@ -151,16 +173,17 @@ void updatePowerMonitor(void)
  *
  *
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+
+ ad88888ba                                                        88  888888888888
+d8"     "8b  ,d                                                   88       88                           ,d
+Y8,          88                                                   88       88                           88
+`Y8aaaaa,  MM88MMM  8b,dPPYba,  ,adPPYYba,  8b,dPPYba,    ,adPPYb,88       88   ,adPPYba,  ,adPPYba,  MM88MMM
+  `"""""8b,  88     88P'   "Y8  ""     `Y8  88P'   `"8a  a8"    `Y88       88  a8P_____88  I8[    ""    88
+        `8b  88     88          ,adPPPPP88  88       88  8b       88       88  8PP"""""""   `"Y8ba,     88
+Y8a     a8P  88,    88          88,    ,88  88       88  "8a,   ,d88       88  "8b,   ,aa  aa    ]8I    88,
+ "Y88888P"   "Y888  88          `"8bbdP"Y8  88       88   `"8bbdP"Y8       88   `"Ybbd8"'  `"YbbdP"'    "Y888
+
+
  ***************        STRANDTEST       ****************
  *
  */
@@ -170,7 +193,9 @@ void fillStrand(uint32_t color)
   for (int i = 0; i < strip.numPixels(); i++)
   {                                // For each pixel in strip...
     strip.setPixelColor(i, color); //  Set pixel's color (in RAM)
-    strip.show();                  //  Update strip to match                          //  Pause for a moment
+    strip.show();                  //  Update strip to match
+    // trace(String("filled NeoPixel #" + String(i) + " with " + String(color)));
+    delay(51); //  Pause for a moment
   }
 }
 
@@ -280,14 +305,16 @@ void theaterChaseRainbow(int wait)
  *
  *
  *
- *
- *
- *
- *
- *
- *
- *
- *
+
+88        88           88  88
+88        88    ,d     ""  88
+88        88    88         88
+88        88  MM88MMM  88  88  ,adPPYba,
+88        88    88     88  88  I8[    ""
+88        88    88     88  88   `"Y8ba,
+Y8a.    .a8P    88,    88  88  aa    ]8I
+ `"Y8888Y"'     "Y888  88  88  `"YbbdP"'
+
  *
  *
  *
@@ -295,14 +322,19 @@ void theaterChaseRainbow(int wait)
  *
  */
 
+void trace(String message)
+{
+  _trace.trace(message);
+}
+
 void showStartUpMessage()
 {
   delay(300);
   digitalWrite(LED_BUILTIN, HIGH);
-  trace.setNeoPixelColor(trace.MAGENTA_DIM);
-  trace.trace(APP_NAME);
+  _trace.setNeoPixelColor(_trace.MAGENTA_DIM);
+  _trace.trace(APP_NAME);
   delay(900);
-  trace.trace("v " + APP_VERSION);
+  _trace.trace("v " + APP_VERSION);
   delay(900);
   digitalWrite(LED_BUILTIN, LOW);
 }

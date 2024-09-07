@@ -1,9 +1,9 @@
 /*****************************************************************************************
-*	Class:		Trace
-*	Purpose:	Outputs debug information to serial port and OLED display if connected
-*   Author:     Hoss Gifford, hoss@flamjam.com
-*   License:    MIT, https://choosealicense.com/licenses/mit/
-******************************************************************************************/
+ *	Class:		Trace
+ *	Purpose:	Outputs debug information to serial port and OLED display if connected
+ *   Author:     Hoss Gifford, hoss@flamjam.com
+ *   License:    MIT, https://choosealicense.com/licenses/mit/
+ ******************************************************************************************/
 
 #ifndef Morse_h
 #define Morse_h
@@ -26,8 +26,9 @@ public:
     void updateDisplayWithImportantMessage(String msg, byte textSize, int displayDuration, bool removeAfterWait);
     void updateDisplayWithTextSize(String msg, byte textSize);
     void clearDisplay();
-    void initNeoPixel();
+    // void initNeoPixel();
     void setNeoPixelColor(uint32_t color);
+    void setNeoPixelColor(byte r, byte g, byte b);
     void flashSOS();
     void flashSOSNeo();
     void flashLED(unsigned int duration);

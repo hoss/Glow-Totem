@@ -192,6 +192,15 @@ void Trace::setNeoPixelColor(uint32_t color)
     _neoPixel.show();
 }
 
+void Trace::setNeoPixelColor(byte r, byte g, byte b)
+{
+    if (!_useNeoPixel)
+        return;
+    _currentNeoPixelColor = _neoPixel.Color(r, g, b);
+    _neoPixel.setPixelColor(0, _currentNeoPixelColor);
+    _neoPixel.show();
+}
+
 void Trace::flashSOS()
 {
     int duration;
