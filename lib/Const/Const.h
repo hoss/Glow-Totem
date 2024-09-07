@@ -10,7 +10,7 @@ public:
 
     // BIG RING LED NEOPIXEL STRIP
     static const unsigned int BIG_RING_LED_COUNT = 20;
-    static const byte BIG_RING_LED_PIN = 5;
+    static const byte BIG_RING_LED_PIN = 6;
 
     // config OLED
     static const bool USE_DISPLAY = false;

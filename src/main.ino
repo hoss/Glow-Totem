@@ -15,7 +15,7 @@
 // config
 const String APP_VERSION = "0.4";     // the version of this app
 const String APP_NAME = "Glow Totem"; // the name of this app
-const bool WAIT_FOR_SERIAL = true;
+const bool WAIT_FOR_SERIAL = false;
 
 // NEOPIXEL CONFIG
 Adafruit_NeoPixel strip(Const::BIG_RING_LED_COUNT, Const::BIG_RING_LED_PIN, NEO_GRB + NEO_KHZ800);
