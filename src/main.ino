@@ -3,22 +3,23 @@
 #include <Trace.h>
 #include <Timer.h>
 #include <OneButton.h>
-// #include <Adafruit_INA219.h>
 #include <Const.h>
 
-// Adafruit_INA219 _powerMonitor;
+#define NEOPIXEL_STRIPS_DISABLED
+#define POWER_MONITOR_DISABLED
 
 #if defined(USE_TINYUSB)
 #include <Adafruit_TinyUSB.h> // for Serial
 #endif
 
 // config
-const String APP_VERSION = "0.4";     // the version of this app
+const String APP_VERSION = "0.6";     // the version of this app
 const String APP_NAME = "Glow Totem"; // the name of this app
-const bool WAIT_FOR_SERIAL = false;
 
+#ifndef NEOPIXEL_STRIPS_DISABLED
 // NEOPIXEL CONFIG
 Adafruit_NeoPixel strip(Const::BIG_RING_LED_COUNT, Const::BIG_RING_LED_PIN, NEO_GRB + NEO_KHZ800);
+#endif
 
 Trace _trace = Trace();
 const String DEBUG_RULE = "=====================================================\n";
@@ -60,10 +61,7 @@ Y8a     a8P  "8b,   ,aa    88,    Y8a.    .a8P  88b,   ,a8"
 
 void setup()
 {
-  // long startUpDelay = 1000;
-  // delay(startUpDelay);
-
-  _trace.initSerial(Const::SERIAL_BAUDRATE, WAIT_FOR_SERIAL);
+  _trace.initSerial(Const::SERIAL_BAUDRATE, Const::WAIT_FOR_SERIAL);
   if (Const::USE_ONBOARD_NEOPIXEL)
   {
     _trace.initNeoPixel(1, Const::ONBOARD_NEOPIXEL_PIN);
@@ -77,7 +75,7 @@ void setup()
   showStartUpMessage();
   initPins();
   initTimers();
-  // initPowerMonitor();
+  initPowerMonitor();
   initBigRingNeoPixelStrip();
 }
 
@@ -90,35 +88,43 @@ void loop()
 
 void initPowerMonitor()
 {
-  // if (!_powerMonitor.begin())
-  // {
-  //   trace("Failed to find INA219 chip to use as _powerMonitor");
-  // }
-  // else
-  //   timer.every(8000, updatePowerMonitor);
+#ifndef POWER_MONITOR_DISABLED
+  if (!_powerMonitor.begin())
+  {
+    trace("Failed to find INA219 chip to use as _powerMonitor");
+  }
+  else
+    timer.every(8000, updatePowerMonitor);
+#endif
 }
 
 void initBigRingNeoPixelStrip()
 {
+#ifndef NEOPIXEL_STRIPS_DISABLED
   strip.begin();            // INITIALIZE NeoPixel strip object (REQUIRED)
   strip.setBrightness(100); // Set BRIGHTNESS to about 1/5 (max = 255)
   fillBigRingNewPixelStripWithSingleRandomColor();
+#endif
 }
 
 void fillBigRingNewPixelStripWithSingleRandomColor()
 {
+#ifndef NEOPIXEL_STRIPS_DISABLED
   byte r = random(255);
   byte g = random(255);
   byte b = random(255);
   trace(String("r:" + String(r) + " g:" + String(g) + " b:" + String(b)));
   _trace.setNeoPixelColor(r, g, b);
   fillStrand(strip.Color(r, g, b));
+#endif
 }
 
 void initTimers()
 {
   timer.every(500, toggleBuiltInLED);
+#ifndef NEOPIXEL_STRIPS_DISABLED
   timer.every(2000, fillBigRingNewPixelStripWithSingleRandomColor);
+#endif
 }
 
 void toggleBuiltInLED()
@@ -132,40 +138,41 @@ void toggleBuiltInLED()
     digitalWrite(LED_BUILTIN, LOW);
   }
   _builtInLEDisOn = !_builtInLEDisOn;
-  // trace("Built in LED is " + String(_builtInLEDisOn ? "on." : "off."));
 }
 
 void updatePowerMonitor(void)
 {
-  // float shuntvoltage = 0;
-  // float busvoltage = 0;
-  // float current_mA = 0;
-  // float loadvoltage = 0;
-  // float power_mW = 0;
+#ifndef POWER_MONITOR_DISABLED
+  float shuntvoltage = 0;
+  float busvoltage = 0;
+  float current_mA = 0;
+  float loadvoltage = 0;
+  float power_mW = 0;
 
-  // shuntvoltage = _powerMonitor.getShuntVoltage_mV();
-  // busvoltage = _powerMonitor.getBusVoltage_V();
-  // current_mA = _powerMonitor.getCurrent_mA();
-  // power_mW = _powerMonitor.getPower_mW();
-  // loadvoltage = busvoltage + (shuntvoltage / 1000);
+  shuntvoltage = _powerMonitor.getShuntVoltage_mV();
+  busvoltage = _powerMonitor.getBusVoltage_V();
+  current_mA = _powerMonitor.getCurrent_mA();
+  power_mW = _powerMonitor.getPower_mW();
+  loadvoltage = busvoltage + (shuntvoltage / 1000);
 
-  // String displayTxt = "";
-  // displayTxt += ("Bus Voltage:   ");
-  // displayTxt += (busvoltage);
-  // displayTxt += (" V\n");
-  // displayTxt += ("Shunt Voltage: ");
-  // displayTxt += (shuntvoltage);
-  // displayTxt += (" mV\n");
-  // displayTxt += ("Load Voltage:  ");
-  // displayTxt += (loadvoltage);
-  // displayTxt += (" V\n");
-  // displayTxt += ("Current:       ");
-  // displayTxt += (current_mA);
-  // displayTxt += (" mA\n");
-  // displayTxt += ("Power:         ");
-  // displayTxt += (power_mW);
-  // displayTxt += (" mW\n");
-  // trace(displayTxt);
+  String displayTxt = "";
+  displayTxt += ("Bus Voltage:   ");
+  displayTxt += (busvoltage);
+  displayTxt += (" V\n");
+  displayTxt += ("Shunt Voltage: ");
+  displayTxt += (shuntvoltage);
+  displayTxt += (" mV\n");
+  displayTxt += ("Load Voltage:  ");
+  displayTxt += (loadvoltage);
+  displayTxt += (" V\n");
+  displayTxt += ("Current:       ");
+  displayTxt += (current_mA);
+  displayTxt += (" mA\n");
+  displayTxt += ("Power:         ");
+  displayTxt += (power_mW);
+  displayTxt += (" mW\n");
+  trace(displayTxt);
+#endif
 }
 
 /*
@@ -187,6 +194,8 @@ Y8a     a8P  88,    88          88,    ,88  88       88  "8a,   ,d88       88  "
  ***************        STRANDTEST       ****************
  *
  */
+
+#ifndef NEOPIXEL_STRIPS_DISABLED
 
 void fillStrand(uint32_t color)
 {
@@ -300,6 +309,9 @@ void theaterChaseRainbow(int wait)
     }
   }
 }
+#else
+//  NEOPIXEL STRANDS ARE DISBLED
+#endif
 
 /*
  *

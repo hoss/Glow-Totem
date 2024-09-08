@@ -6,6 +6,7 @@
 class Const
 {
 public:
+    static const bool WAIT_FOR_SERIAL = true;
     static const unsigned int SERIAL_BAUDRATE = 115200;
 
     // BIG RING LED NEOPIXEL STRIP
