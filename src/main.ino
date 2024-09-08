@@ -5,8 +5,14 @@
 #include <OneButton.h>
 #include <Const.h>
 
-#define NEOPIXEL_STRIPS_DISABLED
-#define POWER_MONITOR_DISABLED
+// #define NEOPIXEL_STRIPS_DISABLED
+// #define POWER_MONITOR_DISABLED
+
+
+#ifndef POWER_MONITOR_DISABLED
+#include <Adafruit_INA219.h>
+Adafruit_INA219 _powerMonitor;
+#endif
 
 #if defined(USE_TINYUSB)
 #include <Adafruit_TinyUSB.h> // for Serial
