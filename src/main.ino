@@ -107,8 +107,8 @@ void initPowerMonitor()
 void initBigRingNeoPixelStrip()
 {
 #ifndef NEOPIXEL_STRIPS_DISABLED
-  strip.begin();            // INITIALIZE NeoPixel strip object (REQUIRED)
-  strip.setBrightness(100); // Set BRIGHTNESS to about 1/5 (max = 255)
+  strip.begin(); 
+  strip.setBrightness(Const::BIG_RING_DEFAULT_BRIGHTNESS); 
   fillBigRingNewPixelStripWithSingleRandomColor();
 #endif
 }
