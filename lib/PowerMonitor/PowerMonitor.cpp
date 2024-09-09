@@ -10,7 +10,9 @@ class PowerMonitor
     bool _powerMonitorHasBegun = false;
     float _totalPowerConsumed = 0;
     const float SECONDS_IN_AN_HOUR = 3600.0; // float to help with calcs
-    const float BATTERY_CAPACITY = 74000.0; // mWh
+    const float BATTERY_CAPACITY = 74000.0;  // mWh
+    String debugNeoPixelFlash();
+
 public:
     void init();
     String getPowerUse();
@@ -27,8 +29,41 @@ void PowerMonitor::init()
     // timer.every(8000, getPowerUse);
 }
 
+String PowerMonitor::debugNeoPixelFlash()
+{
+    String displayTxt = "nsy";
+
+    // float shuntvoltage = 0;
+    // float busvoltage = 0;
+    // float current_mA = 0;
+    // float loadvoltage = 0;
+    // float power_mW = 0;
+
+    // shuntvoltage = _powerMonitor.getShuntVoltage_mV();
+    // busvoltage = _powerMonitor.getBusVoltage_V();
+    // current_mA = _powerMonitor.getCurrent_mA();
+    // power_mW = _powerMonitor.getPower_mW();
+    // loadvoltage = busvoltage + (shuntvoltage / 1000);
+
+    // uint32_t timeNow = millis();
+    // float secondsSinceLastUpdate = (timeNow - _timeOfLastUpdate) / 1000.0;
+    // float mWsUsedSinceLastUpdate = power_mW * secondsSinceLastUpdate;
+    // float mWhUsedSinceLastUpdate = mWsUsedSinceLastUpdate / SECONDS_IN_AN_HOUR;
+    // _timeOfLastUpdate = timeNow;
+    // _totalPowerConsumed += mWhUsedSinceLastUpdate;
+    // float percBatteryConsumed = _totalPowerConsumed / BATTERY_CAPACITY;
+
+    delay(250);
+    // displayTxt = String(current_mA) + "mA";
+    return (displayTxt);
+}
+
 String PowerMonitor::getPowerUse()
 {
+    String displayTxt = "";
+
+    // return (debugNeoPixelFlash());
+
     float shuntvoltage = 0;
     float busvoltage = 0;
     float current_mA = 0;
@@ -47,33 +82,32 @@ String PowerMonitor::getPowerUse()
     float mWhUsedSinceLastUpdate = mWsUsedSinceLastUpdate / SECONDS_IN_AN_HOUR;
     _timeOfLastUpdate = timeNow;
     _totalPowerConsumed += mWhUsedSinceLastUpdate;
-    float percBatteryConsumed = _totalPowerConsumed/BATTERY_CAPACITY;
+    float percBatteryConsumed = _totalPowerConsumed / BATTERY_CAPACITY;
 
-    String displayTxt = "\n\n";
     //   displayTxt += ("Bus Voltage:   ");
     //   displayTxt += (busvoltage);
     //   displayTxt += (" V\n");
     //   displayTxt += ("Shunt Voltage: ");
     //   displayTxt += (shuntvoltage);
     //   displayTxt += (" mV\n");
-    displayTxt += ("Load Voltage:  ");
+    // displayTxt += ("Load Voltage:  ");
     displayTxt += (loadvoltage);
-    displayTxt += (" V\n");
+    displayTxt += ("V\n");
     // displayTxt += ("Current:       ");
-    // displayTxt += (current_mA);
-    // displayTxt += (" mA\n");
-    displayTxt += ("Power:         ");
-    displayTxt += (power_mW);
-    displayTxt += (" mW\n");
+    displayTxt += (int(current_mA));
+    displayTxt += ("mA\n");
+    // displayTxt += ("Power:         ");
+    displayTxt += (int(power_mW));
+    displayTxt += ("mW\n");
     // displayTxt += ("mWsUsedSinceLastUpdate:   ");
     // displayTxt += (mWsUsedSinceLastUpdate);
     // displayTxt += (" mWs\n");
-    displayTxt += ("Total power:   ");
-    displayTxt += (_totalPowerConsumed);
-    displayTxt += (" mWh\n");
-    displayTxt += ("Battery used:  ");
+    // displayTxt += ("Total power:   ");
+    displayTxt += (int(_totalPowerConsumed));
+    displayTxt += ("mWh\n");
+    // displayTxt += ("Battery used:  ");
     displayTxt += (percBatteryConsumed);
-    displayTxt += ("%");
+    displayTxt += ("% BAT");
     // displayTxt += ("secondsSinceLastUpdate:   ");
     // displayTxt += (secondsSinceLastUpdate);
     // displayTxt += (" seconds\n");

@@ -44,6 +44,7 @@ public:
     // void initNeoPixel();
     void setNeoPixelColor(uint32_t color);
     void setNeoPixelColor(byte r, byte g, byte b);
+    void setNeoPixelColor(uint32_t color, byte brightness);
     void flashSOS();
     void flashSOSNeo();
     void flashLED(unsigned int duration);
@@ -52,7 +53,7 @@ public:
     void initDisplay(bool upsideDown, unsigned int startupDelay, byte oledReset);
     void glowNeoPixel();
     void loop();
-    bool glowHeartBeat = true;
+    bool glowHeartBeat = false;
 
     Adafruit_NeoPixel _neoPixel; // = Adafruit_NeoPixel(NEO_PIXEL_COUNT, NEO_PIXEL_PIN);
     const uint32_t RED = _neoPixel.Color(255, 0, 0);

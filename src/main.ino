@@ -5,8 +5,8 @@
 #include <OneButton.h>
 #include <Const.h>
 
-#define NEOPIXEL_STRIPS_DISABLED
-#define POWER_MONITOR_DISABLED
+// #define NEOPIXEL_STRIPS_DISABLED
+// #define POWER_MONITOR_DISABLED
 // #define MINI_TFT_DISABLED
 
 #ifndef MINI_TFT_DISABLED
@@ -24,7 +24,7 @@ PowerMonitor _powerMonitor{};
 #endif
 
 // config
-const String APP_VERSION = "0.7";     // the version of this app
+const String APP_VERSION = "0.8";     // the version of this app
 const String APP_NAME = "Glow Totem"; // the name of this app
 
 #ifndef NEOPIXEL_STRIPS_DISABLED
@@ -32,7 +32,7 @@ const String APP_NAME = "Glow Totem"; // the name of this app
 Adafruit_NeoPixel strip(Const::BIG_RING_LED_COUNT, Const::BIG_RING_LED_PIN, NEO_GRB + NEO_KHZ800);
 #endif
 
-Trace* _trace = Trace::getInstance();
+Trace *_trace = Trace::getInstance();
 const String DEBUG_RULE = "=====================================================\n";
 
 Timer timer;
@@ -91,7 +91,7 @@ void setup()
 
 #ifndef POWER_MONITOR_DISABLED
   _powerMonitor.init();
-  displayPowerUse();
+  // displayPowerUse();
 #endif
 }
 
@@ -129,7 +129,7 @@ void fillBigRingNewPixelStripWithSingleRandomColor()
   byte g = random(255);
   byte b = random(255);
   trace(String("r:" + String(r) + " g:" + String(g) + " b:" + String(b)));
-  _trace.setNeoPixelColor(r, g, b);
+  // _trace->setNeoPixelColor(r, g, b);
   fillStrand(strip.Color(r, g, b));
 #endif
 }
@@ -141,14 +141,16 @@ void initTimers()
   timer.every(2000, fillBigRingNewPixelStripWithSingleRandomColor);
 #endif
 #ifndef POWER_MONITOR_DISABLED
-  timer.every(4707, displayPowerUse);
+  timer.every(Const::DURATION_BETWEEN_POWER_USE_UPDATES, displayPowerUse);
 #endif
 }
 
 void displayPowerUse()
 {
 #ifndef POWER_MONITOR_DISABLED
-  trace(_powerMonitor.getPowerUse());
+  _trace->setNeoPixelColor(_trace->ORANGE, 255);
+  trace(_powerMonitor.getPowerUse(), true);
+  _trace->setNeoPixelColor(_trace->GREEN);
 #endif
 }
 
@@ -163,6 +165,7 @@ void toggleBuiltInLED()
     digitalWrite(LED_BUILTIN, LOW);
   }
   _builtInLEDisOn = !_builtInLEDisOn;
+  // trace("_builtInLEDisOn=" + String(_builtInLEDisOn), true);
 }
 
 /*
@@ -350,6 +353,7 @@ void showStartUpMessage()
   trace(msg, true);
   delay(900);
   digitalWrite(LED_BUILTIN, LOW);
+  _miniTFT.clearScreen();
 }
 
 void initButtons()

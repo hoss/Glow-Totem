@@ -41,6 +41,9 @@ class MiniTFT
     uint32_t version;
     uint32_t _timeOfLastUpdate = 0;
     bool _active = false;
+    String _currentMessage = "nsy";
+    uint32_t _displayBackgroundColor = ST7735_MAGENTA;
+    
 
 public:
     void init();
@@ -49,12 +52,13 @@ public:
     bool isActive();
     void initDisplay(bool upsideDown, unsigned int startupDelay, byte oledReset);
     void displayNewMessage(String msg);
+    void clearScreen();
+    void clearScreen(uint16_t color);
 
 private:
     void updateDisplay(String msg);
     Trace *_trace = Trace::getInstance();
     void trace(String message);
-    String _currentMessage="nsy";
 };
 
 bool MiniTFT::isActive()
@@ -64,16 +68,24 @@ bool MiniTFT::isActive()
 
 void MiniTFT::displayNewMessage(String msg)
 {
-    // updateDisplay(msg);
     uint16_t color = ST77XX_WHITE;
-    trace(".displayNewMessage(" + msg + ")");
-    tft->fillScreen(ST77XX_RED);
+    tft->fillScreen(_displayBackgroundColor);
     tft->setCursor(0, 0);
     tft->setTextColor(color);
     tft->setTextSize(2);
     tft->setTextWrap(true);
     tft->print(msg);
     _currentMessage = msg;
+}
+
+void MiniTFT::clearScreen()
+{
+    clearScreen(ST77XX_BLACK);
+}
+void MiniTFT::clearScreen(uint16_t color)
+{
+    tft->fillScreen(color);
+    _displayBackgroundColor = color;
 }
 
 void MiniTFT::updateDisplay(String msg)

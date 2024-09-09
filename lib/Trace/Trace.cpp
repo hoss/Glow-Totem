@@ -2,9 +2,10 @@
 #include <Trace.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include <Const.h>
 
 // Initialize the static member (Singleton instance)
-Trace* Trace::instance = nullptr;
+Trace *Trace::instance = nullptr;
 
 Trace::Trace()
 {
@@ -188,18 +189,24 @@ void Trace::glowNeoPixel()
 void Trace::initNeoPixel(unsigned int neoPixelCount, byte neoPixelPin)
 {
     _neoPixel = Adafruit_NeoPixel(neoPixelCount, neoPixelPin);
+    _neoPixel.setBrightness(Const::ONBOARD_NEOPIXEL_DEFAULT_BRIGHTNESS);
     _neoPixel.begin();
     _neoPixel.show();
     _useNeoPixel = true;
 }
 
-void Trace::setNeoPixelColor(uint32_t color)
+void Trace::setNeoPixelColor(uint32_t color, byte brightness)
 {
     if (!_useNeoPixel)
         return;
+    _neoPixel.setBrightness(brightness);
     _currentNeoPixelColor = color;
     _neoPixel.setPixelColor(0, _currentNeoPixelColor);
     _neoPixel.show();
+}
+void Trace::setNeoPixelColor(uint32_t color)
+{
+    setNeoPixelColor(color, Const::ONBOARD_NEOPIXEL_DEFAULT_BRIGHTNESS);
 }
 
 void Trace::setNeoPixelColor(byte r, byte g, byte b)
