@@ -10,7 +10,7 @@ class PowerMonitor
     bool _powerMonitorHasBegun = false;
     float _totalPowerConsumed = 0;
     const float SECONDS_IN_AN_HOUR = 3600.0; // float to help with calcs
-    const uint BATTERY_CAPACITY = 74000.0; // mWh
+    const float BATTERY_CAPACITY = 74000.0; // mWh
 public:
     void init();
     String getPowerUse();

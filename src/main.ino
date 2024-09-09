@@ -5,8 +5,14 @@
 #include <OneButton.h>
 #include <Const.h>
 
-// #define NEOPIXEL_STRIPS_DISABLED
-// #define POWER_MONITOR_DISABLED
+#define NEOPIXEL_STRIPS_DISABLED
+#define POWER_MONITOR_DISABLED
+// #define MINI_TFT_DISABLED
+
+#ifndef MINI_TFT_DISABLED
+#include <MiniTFT.cpp>
+MiniTFT _miniTFT{};
+#endif
 
 #ifndef POWER_MONITOR_DISABLED
 #include <PowerMonitor.cpp>
@@ -18,7 +24,7 @@ PowerMonitor _powerMonitor{};
 #endif
 
 // config
-const String APP_VERSION = "0.6";     // the version of this app
+const String APP_VERSION = "0.7";     // the version of this app
 const String APP_NAME = "Glow Totem"; // the name of this app
 
 #ifndef NEOPIXEL_STRIPS_DISABLED
@@ -80,17 +86,26 @@ void setup()
   showStartUpMessage();
   initPins();
   initTimers();
+  initBigRingNeoPixelStrip();
+
 #ifndef POWER_MONITOR_DISABLED
   _powerMonitor.init();
   displayPowerUse();
 #endif
-  initBigRingNeoPixelStrip();
+
+#ifndef MINI_TFT_DISABLED
+  _miniTFT.init();
+  trace(_miniTFT.getDisplayTxt());
+#endif
 }
 
 void loop()
 {
   timer.update();
   _trace.loop();
+#ifndef MINI_TFT_DISABLED
+  _miniTFT.loop();
+#endif
   // loopStrandTest();
 }
 
@@ -128,7 +143,9 @@ void initTimers()
 
 void displayPowerUse()
 {
+#ifndef POWER_MONITOR_DISABLED
   trace(_powerMonitor.getPowerUse());
+#endif
 }
 
 void toggleBuiltInLED()
