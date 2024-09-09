@@ -32,7 +32,7 @@ const String APP_NAME = "Glow Totem"; // the name of this app
 Adafruit_NeoPixel strip(Const::BIG_RING_LED_COUNT, Const::BIG_RING_LED_PIN, NEO_GRB + NEO_KHZ800);
 #endif
 
-Trace _trace = Trace();
+Trace* _trace = Trace::getInstance();
 const String DEBUG_RULE = "=====================================================\n";
 
 Timer timer;
@@ -72,16 +72,17 @@ Y8a     a8P  "8b,   ,aa    88,    Y8a.    .a8P  88b,   ,a8"
 
 void setup()
 {
-  _trace.initSerial(Const::SERIAL_BAUDRATE, Const::WAIT_FOR_SERIAL);
+  initMiniTFT();
+  _trace->initSerial(Const::SERIAL_BAUDRATE, Const::WAIT_FOR_SERIAL);
   if (Const::USE_ONBOARD_NEOPIXEL)
   {
-    _trace.initNeoPixel(1, Const::ONBOARD_NEOPIXEL_PIN);
-    _trace.setNeoPixelColor(_trace.YELLOW);
+    _trace->initNeoPixel(1, Const::ONBOARD_NEOPIXEL_PIN);
+    _trace->setNeoPixelColor(_trace->YELLOW);
   }
   if (Const::USE_DISPLAY)
-    _trace.initDisplay(Const::UPSIDE_DOWN_DISPLAY, Const::OLED_STARTUP_DELAY, Const::OLED_RESET);
+    _trace->initDisplay(Const::UPSIDE_DOWN_DISPLAY, Const::OLED_STARTUP_DELAY, Const::OLED_RESET);
   long randomValue = analogRead(A1);
-  trace("randomValue" + String(randomValue));
+  trace("randomValue" + String(randomValue), true);
   randomSeed(randomValue);
   showStartUpMessage();
   initPins();
@@ -92,7 +93,10 @@ void setup()
   _powerMonitor.init();
   displayPowerUse();
 #endif
+}
 
+void initMiniTFT()
+{
 #ifndef MINI_TFT_DISABLED
   _miniTFT.init();
   trace(_miniTFT.getDisplayTxt());
@@ -102,7 +106,7 @@ void setup()
 void loop()
 {
   timer.update();
-  _trace.loop();
+  _trace->loop();
 #ifndef MINI_TFT_DISABLED
   _miniTFT.loop();
 #endif
@@ -322,17 +326,28 @@ Y8a.    .a8P    88,    88  88  aa    ]8I
 
 void trace(String message)
 {
-  _trace.trace(message);
+  trace(message, false);
+}
+
+void trace(String message, bool showOnDisplay)
+{
+  _trace->trace(message);
+#ifndef MINI_TFT_DISABLED
+  if (showOnDisplay)
+    _miniTFT.displayNewMessage(message);
+#endif
 }
 
 void showStartUpMessage()
 {
   delay(300);
   digitalWrite(LED_BUILTIN, HIGH);
-  _trace.setNeoPixelColor(_trace.MAGENTA_DIM);
-  _trace.trace(APP_NAME);
+  _trace->setNeoPixelColor(_trace->MAGENTA_DIM);
+  String msg = APP_NAME;
+  trace(msg, true);
   delay(900);
-  _trace.trace("v " + APP_VERSION);
+  msg += ("\nv" + APP_VERSION);
+  trace(msg, true);
   delay(900);
   digitalWrite(LED_BUILTIN, LOW);
 }

@@ -17,7 +17,22 @@
 class Trace
 {
 public:
-    Trace();
+    // IMPLEMENT AS SINGLETON 
+    // Delete copy constructor and assignment operator to prevent copies
+    Trace(const Trace &) = delete;
+    Trace &operator=(const Trace &) = delete;
+    // Static method to provide access to the single instance
+    static Trace *getInstance()
+    {
+        if (instance == nullptr)
+        { // If no instance exists, create one
+            instance = new Trace();
+        }
+        return instance;
+    }
+    //  END SINGLETON CODE
+
+    bool serialHasBegun();
     void trace(String msg);
     void traceHold(String msg);
     void traceToSerial(String msg);
@@ -49,6 +64,8 @@ public:
     const uint32_t BLUE = _neoPixel.Color(0, 0, 255);
 
 private:
+    Trace();
+    static Trace *instance;
     Adafruit_SSD1306 _display;
     bool _useDisplay = false;
     bool _useSerial = false;

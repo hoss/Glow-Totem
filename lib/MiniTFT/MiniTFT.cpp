@@ -4,6 +4,7 @@
 #include <Adafruit_ST7735.h>
 #include <Adafruit_ST7789.h>
 #include "Adafruit_miniTFTWing.h"
+#include <Const.h>
 
 Adafruit_miniTFTWing ss;
 #define TFT_RST -1 // we use the seesaw for resetting to save a pin
@@ -31,15 +32,13 @@ Adafruit_miniTFTWing ss;
 #define TFT_CS 5
 #define TFT_DC 6
 #endif
-Adafruit_ST7789 tft_7789 = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_RST);
-Adafruit_ST7735 tft_7735 = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
-
-// we'll assign it later
-Adafruit_ST77xx *tft = NULL;
-uint32_t version;
 
 class MiniTFT
 {
+    Adafruit_ST7789 tft_7789 = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_RST);
+    Adafruit_ST7735 tft_7735 = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
+    Adafruit_ST77xx *tft = NULL; // we'll assign it later
+    uint32_t version;
     uint32_t _timeOfLastUpdate = 0;
     bool _active = false;
 
@@ -47,50 +46,76 @@ public:
     void init();
     String getDisplayTxt();
     void loop();
+    bool isActive();
+    void initDisplay(bool upsideDown, unsigned int startupDelay, byte oledReset);
+    void displayNewMessage(String msg);
+
+private:
+    void updateDisplay(String msg);
+    Trace *_trace = Trace::getInstance();
+    void trace(String message);
+    String _currentMessage="nsy";
 };
+
+bool MiniTFT::isActive()
+{
+    return _active;
+}
+
+void MiniTFT::displayNewMessage(String msg)
+{
+    // updateDisplay(msg);
+    uint16_t color = ST77XX_WHITE;
+    trace(".displayNewMessage(" + msg + ")");
+    tft->fillScreen(ST77XX_RED);
+    tft->setCursor(0, 0);
+    tft->setTextColor(color);
+    tft->setTextSize(2);
+    tft->setTextWrap(true);
+    tft->print(msg);
+    _currentMessage = msg;
+}
+
+void MiniTFT::updateDisplay(String msg)
+{
+    // STUB
+}
 
 String MiniTFT::getDisplayTxt()
 {
-    return ("from MiniTFT");
+    return _currentMessage;
 }
 
 void MiniTFT::init()
 {
-
+    _trace->initSerial(Const::SERIAL_BAUDRATE, Const::WAIT_FOR_SERIAL);
     if (!ss.begin())
     {
-        Serial.println("seesaw couldn't be found!");
-        while (1)
-            ;
+        trace("   *****   seesaw couldn't be found!");
+        return;
     }
-    Serial.println("seesaw found!");
+    trace("seesaw found!");
 
     version = ((ss.getVersion() >> 16) & 0xFFFF);
-    Serial.print("Version: ");
-    Serial.println(version);
-    if (version == 3322)
-    {
-        Serial.println("Version 2 TFT FeatherWing found");
-    }
-    else
-    {
-        Serial.println("Version 1 TFT FeatherWing found");
-    }
+    trace("SeeSaw Version: " + String(version));
 
     ss.tftReset();                         // reset the display
     ss.setBacklight(TFTWING_BACKLIGHT_ON); // turn off the backlight
 
     if (version == 3322)
     {
+        trace("Version 2 TFT FeatherWing found");
         tft_7789.init(135, 240);
         tft = &tft_7789;
     }
     else
     {
+        // Version 1 TFT FeatherWing THAT I'M USING
+        trace("Version 1 TFT FeatherWing found");
         tft_7735.initR(INITR_MINI160x80); // initialize a ST7735S chip, mini display
         tft = &tft_7735;
     }
-    tft->setRotation(1);
+    tft->setRotation(3);
     Serial.println("TFT initialized");
 
     tft->fillScreen(ST77XX_RED);
@@ -104,6 +129,7 @@ void MiniTFT::init()
 
 void MiniTFT::loop()
 {
+    return;
     uint32_t buttons = ss.readButtons();
     // Serial.println(buttons, BIN);
 
@@ -213,4 +239,9 @@ void MiniTFT::loop()
     {
         tft->fillCircle(80, 40, 7, color);
     }
+}
+
+void MiniTFT::trace(String message)
+{
+    _trace->trace("MiniTFT :: " + message);
 }

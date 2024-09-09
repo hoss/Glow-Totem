@@ -3,6 +3,9 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
+// Initialize the static member (Singleton instance)
+Trace* Trace::instance = nullptr;
+
 Trace::Trace()
 {
     _currentNeoPixelColor = RED;
@@ -17,6 +20,8 @@ void Trace::loop()
 
 void Trace::initSerial(unsigned int serialBaudrate, bool waitForSerial)
 {
+    if (serialHasBegun()) // init already completed
+        return;
     Serial.begin(serialBaudrate);
     // long count = 0;
     if (waitForSerial)
@@ -30,6 +35,11 @@ void Trace::initSerial(unsigned int serialBaudrate, bool waitForSerial)
     _useSerial = true;
     delay(500);
     Serial.println("Serial initialized with Baudrate = " + String(serialBaudrate));
+}
+
+bool Trace::serialHasBegun()
+{
+    return _useSerial;
 }
 
 void Trace::traceToSerial(String msg)
@@ -128,22 +138,22 @@ void Trace::clearDisplay()
 }
 
 /*
- *  
  *
  *
  *
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
  ***************        ONBOARD NEOPIXEL       ****************
- * 
+ *
  */
 
 void Trace::glowNeoPixel()
