@@ -8,10 +8,9 @@
 // #define NEOPIXEL_STRIPS_DISABLED
 // #define POWER_MONITOR_DISABLED
 
-
 #ifndef POWER_MONITOR_DISABLED
-#include <Adafruit_INA219.h>
-Adafruit_INA219 _powerMonitor;
+#include <PowerMonitor.cpp>
+PowerMonitor _powerMonitor{};
 #endif
 
 #if defined(USE_TINYUSB)
@@ -81,7 +80,10 @@ void setup()
   showStartUpMessage();
   initPins();
   initTimers();
-  initPowerMonitor();
+#ifndef POWER_MONITOR_DISABLED
+  _powerMonitor.init();
+  displayPowerUse();
+#endif
   initBigRingNeoPixelStrip();
 }
 
@@ -92,23 +94,11 @@ void loop()
   // loopStrandTest();
 }
 
-void initPowerMonitor()
-{
-#ifndef POWER_MONITOR_DISABLED
-  if (!_powerMonitor.begin())
-  {
-    trace("Failed to find INA219 chip to use as _powerMonitor");
-  }
-  else
-    timer.every(8000, updatePowerMonitor);
-#endif
-}
-
 void initBigRingNeoPixelStrip()
 {
 #ifndef NEOPIXEL_STRIPS_DISABLED
-  strip.begin(); 
-  strip.setBrightness(Const::BIG_RING_DEFAULT_BRIGHTNESS); 
+  strip.begin();
+  strip.setBrightness(Const::BIG_RING_DEFAULT_BRIGHTNESS);
   fillBigRingNewPixelStripWithSingleRandomColor();
 #endif
 }
@@ -131,6 +121,14 @@ void initTimers()
 #ifndef NEOPIXEL_STRIPS_DISABLED
   timer.every(2000, fillBigRingNewPixelStripWithSingleRandomColor);
 #endif
+#ifndef POWER_MONITOR_DISABLED
+  timer.every(4707, displayPowerUse);
+#endif
+}
+
+void displayPowerUse()
+{
+  trace(_powerMonitor.getPowerUse());
 }
 
 void toggleBuiltInLED()
@@ -144,41 +142,6 @@ void toggleBuiltInLED()
     digitalWrite(LED_BUILTIN, LOW);
   }
   _builtInLEDisOn = !_builtInLEDisOn;
-}
-
-void updatePowerMonitor(void)
-{
-#ifndef POWER_MONITOR_DISABLED
-  float shuntvoltage = 0;
-  float busvoltage = 0;
-  float current_mA = 0;
-  float loadvoltage = 0;
-  float power_mW = 0;
-
-  shuntvoltage = _powerMonitor.getShuntVoltage_mV();
-  busvoltage = _powerMonitor.getBusVoltage_V();
-  current_mA = _powerMonitor.getCurrent_mA();
-  power_mW = _powerMonitor.getPower_mW();
-  loadvoltage = busvoltage + (shuntvoltage / 1000);
-
-  String displayTxt = "";
-  displayTxt += ("Bus Voltage:   ");
-  displayTxt += (busvoltage);
-  displayTxt += (" V\n");
-  displayTxt += ("Shunt Voltage: ");
-  displayTxt += (shuntvoltage);
-  displayTxt += (" mV\n");
-  displayTxt += ("Load Voltage:  ");
-  displayTxt += (loadvoltage);
-  displayTxt += (" V\n");
-  displayTxt += ("Current:       ");
-  displayTxt += (current_mA);
-  displayTxt += (" mA\n");
-  displayTxt += ("Power:         ");
-  displayTxt += (power_mW);
-  displayTxt += (" mW\n");
-  trace(displayTxt);
-#endif
 }
 
 /*

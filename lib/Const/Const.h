@@ -10,7 +10,7 @@ public:
     static const unsigned int SERIAL_BAUDRATE = 115200;
 
     // BIG RING LED NEOPIXEL STRIP
-    static const byte BIG_RING_DEFAULT_BRIGHTNESS = 7; // (max = 255)
+    static const byte BIG_RING_DEFAULT_BRIGHTNESS = 255; // (max = 255)
     static const unsigned int BIG_RING_LED_COUNT = 20;
     static const byte BIG_RING_LED_PIN = 6;
 
