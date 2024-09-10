@@ -43,7 +43,6 @@ class MiniTFT
     bool _active = false;
     String _currentMessage = "nsy";
     uint32_t _displayBackgroundColor = ST7735_MAGENTA;
-    
 
 public:
     void init();
@@ -54,6 +53,7 @@ public:
     void displayNewMessage(String msg);
     void clearScreen();
     void clearScreen(uint16_t color);
+    void drawProgressRect(float percWidth, float percHeight, uint16_t color);
 
 private:
     void updateDisplay(String msg);
@@ -64,6 +64,16 @@ private:
 bool MiniTFT::isActive()
 {
     return _active;
+}
+
+void MiniTFT::drawProgressRect(float percWidth, float percHeight, uint16_t color)
+{
+    int16_t w = tft->width();
+    int16_t h = tft->height();
+    int16_t width = int16_t(percWidth * w);
+    int16_t height = int16_t(percHeight * h);
+    // tft->fillRect(0, 0, width, height, color);
+    tft->fillRect(w - width, 0, width, height, color);
 }
 
 void MiniTFT::displayNewMessage(String msg)

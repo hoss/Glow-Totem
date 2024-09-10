@@ -148,8 +148,9 @@ void initTimers()
 void displayPowerUse()
 {
 #ifndef POWER_MONITOR_DISABLED
-  _trace->setNeoPixelColor(_trace->ORANGE, 255);
-  trace(_powerMonitor.getPowerUse(), true);
+  _trace->setNeoPixelColor(_trace->ORANGE);
+  trace(_powerMonitor.getPowerUse()+String(_powerMonitor.getPercLoad()), true);
+  _miniTFT.drawProgressRect(_powerMonitor.getPercLoad(), 0.5, ST7735_RED);
   _trace->setNeoPixelColor(_trace->GREEN);
 #endif
 }
