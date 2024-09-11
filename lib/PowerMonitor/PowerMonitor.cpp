@@ -58,6 +58,7 @@ String PowerMonitor::getPowerUse()
     _timeOfLastUpdate = timeNow;
     _totalPowerConsumed += mWhUsedSinceLastUpdate;
     float percBatteryConsumed = _totalPowerConsumed / Const::BATTERY_CAPACITY * 100.0;
+    float percBatteryRemaining = 100 - percBatteryConsumed;
     _percLoad = current_mA / Const::BATTERY_MAX_LOAD;
 
     //   displayTxt += ("Bus Voltage:   ");
@@ -68,22 +69,22 @@ String PowerMonitor::getPowerUse()
     //   displayTxt += (" mV\n");
     // displayTxt += ("Load Voltage:  ");
     displayTxt += (loadvoltage);
-    displayTxt += ("V\n");
+    displayTxt += (" V\n");
     // displayTxt += ("Current:       ");
     displayTxt += (int(current_mA));
-    displayTxt += ("mA\n");
+    displayTxt += (" mA\n");
     // displayTxt += ("Power:         ");
     displayTxt += (int(power_mW));
-    displayTxt += ("mW\n");
+    displayTxt += (" mW\n");
     // displayTxt += ("mWsUsedSinceLastUpdate:   ");
     // displayTxt += (mWsUsedSinceLastUpdate);
     // displayTxt += (" mWs\n");
     // displayTxt += ("Total power:   ");
     displayTxt += (int(_totalPowerConsumed));
-    displayTxt += ("mWh\n");
+    displayTxt += (" mWh\n");
     // displayTxt += ("Battery used:  ");
-    displayTxt += (percBatteryConsumed);
-    displayTxt += ("%B ");
+    displayTxt += (percBatteryRemaining);
+    displayTxt += (" %");
     // displayTxt += ("secondsSinceLastUpdate:   ");
     // displayTxt += (secondsSinceLastUpdate);
     // displayTxt += (" seconds\n");

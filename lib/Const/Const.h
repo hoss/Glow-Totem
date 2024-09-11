@@ -11,13 +11,19 @@ public:
     static const byte ONBOARD_NEOPIXEL_DEFAULT_BRIGHTNESS = 20;
 
     // POWER
+    // AUKEY PB-N36 claims 74Wh but actually provides 56Wh
+    static constexpr float BATTERY_CAPACITY = 56000.0; // mWh
+    // AUKEY PB-N36 has max output between 2 USB-A of 3.4mA
+    static const uint16_t BATTERY_MAX_LOAD_FOR_ALL_PORTS = 3400; // mA
+    // The power monitor doesn't track Feather use so leave headroom.
+    static const uint16_t BATTERY_LOAD_FOR_FEATHER = 400; // mA
+    static constexpr float BATTERY_MAX_LOAD =
+        BATTERY_MAX_LOAD_FOR_ALL_PORTS - BATTERY_LOAD_FOR_FEATHER * 1.0; // mA
     static const unsigned int DURATION_BETWEEN_POWER_USE_UPDATES = 2009;
-    static constexpr float BATTERY_CAPACITY = 74000.0;  // mWh
-    static constexpr float BATTERY_MAX_LOAD = 2400.0; // mA
 
     // BIG RING LED NEOPIXEL STRIP
-    static const byte BIG_RING_DEFAULT_BRIGHTNESS = 9; // (max = 255)
-    static const unsigned int BIG_RING_LED_COUNT = 20;
+    static const byte BIG_RING_DEFAULT_BRIGHTNESS = 175; // (max = 255)
+    static const unsigned int BIG_RING_LED_COUNT = 144;
     static const byte BIG_RING_LED_PIN = 9;
 
     // config OLED

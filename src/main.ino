@@ -29,7 +29,8 @@ const String APP_NAME = "Glow Totem"; // the name of this app
 
 #ifndef NEOPIXEL_STRIPS_DISABLED
 // NEOPIXEL CONFIG
-Adafruit_NeoPixel strip(Const::BIG_RING_LED_COUNT, Const::BIG_RING_LED_PIN, NEO_GRB + NEO_KHZ800);
+// Adafruit_NeoPixel strip(Const::BIG_RING_LED_COUNT, Const::BIG_RING_LED_PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel strip(Const::BIG_RING_LED_COUNT, Const::BIG_RING_LED_PIN, NEO_RGBW + NEO_KHZ800);
 #endif
 
 Trace *_trace = Trace::getInstance();
@@ -198,7 +199,7 @@ void fillStrand(uint32_t color)
     strip.setPixelColor(i, color); //  Set pixel's color (in RAM)
     strip.show();                  //  Update strip to match
     // trace(String("filled NeoPixel #" + String(i) + " with " + String(color)));
-    delay(51); //  Pause for a moment
+    delay(5); //  Pause for a moment
   }
 }
 
